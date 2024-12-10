@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MaaS</title>
+    <link rel="icon" type="image/x-icon" href="/images/ts3d_icon.svg">
+    <link rel="stylesheet" href="styles/styles.css" />
+
+    <script src="js/hoops/hoops-web-viewer-monolith.iife.js"></script>
+
+    <script src="js/utility/groundPlane.js"></script>
+    <script src="js/utility/cuttingPlane.js"></script>
+    <script src="js/utility/measurements.js"></script>
+    <script src="js/utility/overhangs.js"></script>
+    <script src="js/utility/wallThickness.js"></script>
+    <script src="js/utility/featureDetection.js"></script>
+
+    <script src="js/app.js"></script>
+
+    <script src="js/operators/measureRadiusOp.js"></script>
+
+    <!-- Boxicon for icons -->
+    <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
+
+    <!-- driver.js for app tour -->
+    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css" />
+    <script src="js/tour.js" defer></script>
+</head>
+
+<body>
+
+    <div id="viewer"></div>
+
+    <div id="loading">
+        <img src="images/spinner.gif">
+    </div>
+
+    <div id="infoPanel">
+        <div id="pinInfoPanel">
+            <box-icon name='pin'></box-icon>
+        </div>
+        <div id="infoPanelTab">
+            <box-icon name='info-circle'></box-icon>
+        </div>
+        <div id="infoDetails">
+            <h3>Model Details:</h3>
+            <p>Name: <span id="modelName" class="modelSpecs"><i>Please load a model</i></span></p>
+            <p style="margin-bottom: 0;">Bounding:</p>
+            <ul style="list-style-type: none; margin-top: 0;">
+                <li>Length: <span id="boundingLength" class="modelSpecs"></span></li>
+                <li>Width: <span id="boundingWidth" class="modelSpecs"></span></li>
+                <li>Height: <span id="boundingHeight" class="modelSpecs"></span></li>
+            </ul>
+
+            <p>Volume: <span id="modelVolume" class="modelSpecs"></span></p>
+            <p>Surface Area: <span id="modelSurfaceArea" class="modelSpecs"></span></p>
+            <p>Mass: <span id="modelMass" class="modelSpecs"></span>
+                <spand id="assignMaterialPrompt">Please assign a material <box-icon name='error'
+                        animation='flashing'></box-icon></span>
+            </p>
+
+            <div id="materialProps">
+                <div style="margin-bottom: 10px;">
+                    <label for="materialSelect" style="margin-left: 20px;">Material:</label>
+                    <select id="materialSelect" default="none">
+                        <option hidden disabled selected value>Choose one:</option>
+                        <optgroup label="Metals">
+                            <option value="a6061">Aluminum - 6061</option>
+                            <option value="a5052">Aluminum - 5052</option>
+                            <option value="ss316">Stainless Steel - 316</option>
+                            <option value="s1018">Steel - 1018</option>
+                        </optgroup>
+                        <optgroup label="Plastics">
+                            <option value="delrin">Delrin</option>
+                            <option value="hdpe">HDPE</option>
+                            <option value="abs">ABS</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div id="colorSelectDiv">
+                    <label for="colorSelect" style="margin-left: 20px;">Color:</label>
+                    <input id="colorSelect" type="color" value="#ffffff">
+                    <div class="toolTip" style="bottom: unset;">
+                        <p><i>Select a plastic to change color.</i></p>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+    <div id="mainMenu">
+        <div id="tourBtn" class="menuBtn" style="background-color: rgb(150,255,255);">
+            <box-icon name='help-circle'></box-icon>
+            <div class="toolTip">
+                <p>
+                    Take a quick tour
+                </p>
+            </div>
+        </div>
+        <div class="toolTipContainer">
+            <label id="loadButton" for="uploadInput" class="menuBtn"><box-icon name='upload'></box-icon></label>
+            <input type="file" name="modelFile" id="uploadInput" style="display: none;"
+                accept=".stl, .step, .stp, .iges, .igs, .SLDPRT, .prt, .CATPart, .glb, .gltf, .jt, .ipt" />
+            <div class="toolTip">
+                <p>
+                    Upload a CAD model<br>
+                    <i>HOOPS Exchange</i>
+                </p>
+            </div>
+        </div>
+        <div id="measureBtn" class="menuBtn">
+            <box-icon name='ruler'></box-icon>
+            <div class="toolTip">
+                <p>
+                    Measure<br>
+                    <i>HOOPS Communicator</i>
+                </p>
+            </div>
+        </div>
+        <div id="wallThicknessBtn" class="menuBtn">
+            <box-icon name='collapse-horizontal'></box-icon>
+            <div class="toolTip">
+                <p>
+                    Check wall thickness<br>
+                    <i>Polygonica (analysis) &<br>
+                        HOOPS Communicator (display)</i>
+                </p>
+            </div>
+        </div>
+        <div id="detectOverhangsBtn" class="menuBtn">
+            <box-icon name='flag'></box-icon>
+            <div class="toolTip">
+                <p>
+                    Detect overhangs<br>
+                    <i>HOOPS Communicator</i>
+                </p>
+            </div>
+        </div>
+        <div id="detectFeaturesBtn" class="menuBtn">
+            <box-icon name='search-alt-2'></box-icon>
+            <div class="toolTip">
+                <p>
+                    Detect features<br>
+                    <i>Polygonica (analysis) &<br>
+                        HOOPS Communicator (display)</i>
+                </p>
+            </div>
+        </div>
+        <div id="orientBtn" class="menuBtn">
+            <box-icon name='chevrons-up' type='solid'></box-icon>
+            <div class="toolTip">
+                <p>
+                    Orient model<br>
+                    <i>HOOPS Communicator</i>
+                </p>
+            </div>
+        </div>
+        <div id="cutBtn" class="menuBtn">
+            <box-icon type='solid' name='cuboid'></box-icon>
+            <div class="toolTip">
+                <p>
+                    Cut<br>
+                    <i>HOOPS Communicator</i>
+                </p>
+            </div>
+        </div>
+        <div id="groundBtn" class="menuBtn">
+            <box-icon name='map-pin' type='solid'></box-icon>
+            <div class="toolTip">
+                <p>
+                    Toggle bed<br>
+                    <i>HOOPS Communicator</i>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div id="measureModal" class="utilityModal">
+        <h3>Inspect part:</h3>
+        <p class="clickable" id="measurePtPt">Measure point to point</p>
+        <p class="clickable" id="measureAngle">Measure angle between faces</p>
+        <p class="clickable" id="measureFaceDistance">Measure distance between parallel faces</p>
+        <p class="clickable" id="measureEdge">Measure edge length / radius</p>
+        <p class="clickable" id="measureRadius">Measure radius</p>
+        <div class="toolTipContainer">
+            <p class="clickable" id="togglePmi">Toggle PMI</p>
+            <div class="toolTip" style="bottom: unset;">
+                <p><i>Hide or show any PMI (GD&T) data embedded in the 3D model.</i></p>
+            </div>
+        </div>
+
+        <p class="clickable" id="clearMeasurements">Clear</p>
+    </div>
+
+    <div id="orientModal" class="utilityModal">
+        <h3>Orientation:</h3>
+        <form>
+            <label for="upAxis">Define up axis</label>
+            <select id="upAxis" default="none">
+                <option disabled hidden selected value="none">Choose one:</option>
+                <option id="xp" value="xp">+X</option>
+                <option id="yp" value="yp">+Y</option>
+                <option id="zp" value="zp">+Z</option>
+                <option id="xn" value="xn">-X</option>
+                <option id="yn" value="yn">-Y</option>
+                <option id="zn" value="zn">-Z</option>
+            </select>
+        </form>
+    </div>
+
+    <div id="overhangsModal" class="utilityModal">
+        <h3>Detect Overhangs</h3>
+        <label for="overhangAngle">Minimum angle</label><br>
+        <input id="overhangAngle" type="range" min="0" max="90" value="45" /><span id="overhangAngleValue">45</span>
+    </div>
+
+    <div id="thinWallModal" class="utilityModal">
+        <h3>Wall Thickness</h3>
+
+        <table id="wallThicknessTable" style="text-align: center;">
+            <tr>
+                <td><input id="thinWallColor1" class="thicknessInput" type="color" value="#ff0000" /></td>
+                <td><label for="thinWallVal1">0</label></td>
+                <td>&#x2192;</td>
+                <td><input id="thinWallVal1" class="thicknessInput" type="number" min="0" value="0.5" step="0.1"
+                        style="width: 50px; text-align: right;" /></td>
+                <td>mm</td>
+            </tr>
+            <tr>
+                <td><input id="thinWallColor2" class="thicknessInput" type="color" value="#ffaa00" /></td>
+                <td><label for="thinWallVal2"><span id="thinWallVal1Out">0.5</span></label></td>
+                <td>&#x2192;</td>
+                <td><input id="thinWallVal2" class="thicknessInput" type="number" min="0" value="1" step="0.1"
+                        style="width: 50px; text-align: right;" /></td>
+                <td>mm</td>
+            </tr>
+            <tr>
+                <td><input id="thinWallColor3" class="thicknessInput" type="color" value="#00ff00" /></td>
+                <td><label for="thinWallVal3"><span id="thinWallVal2Out">1</span></label></td>
+                <td>&#x2192;</td>
+                <td> <input id="thinWallVal3" class="thicknessInput" type="number" min="0" value="2" step="0.1"
+                        style="width: 50px; text-align: right;" /></td>
+                <td>mm</td>
+            </tr>
+            <tr>
+                <td><input id="thinWallColor4" class="thicknessInput" type="color" value="#0000ff" /></td>
+                <td><label for="thinWallVal4"><span id="thinWallVal3Out">2</span></label></td>
+                <td>&#x2192;</td>
+                <td><input id="thinWallVal4" class="thicknessInput" type="number" min="0" value="4" step="0.1"
+                        style="width: 50px; text-align: right;" /></td>
+                <td>mm</td>
+            </tr>
+            <tr>
+                <td><input id="thinWallColor5" class="thicknessInput" type="color" value="#ff00ff" /></td>
+                <td><label for="wallThicknessInputOver"><span id="thinWallVal4Out">4</span>+</td>
+                <td>mm</td>
+                <td></td>
+                <td></td>
+            </tr>
+        </table>
+
+
+    </div>
+
+    <div id="featuresModal" class="utilityModal">
+        <h3>Machining features</h3>
+        <ul id="featuresList">
+            <!--<li style = "background-color: rgb(0,255,255);">Planes: <span id="featureCountPlane" ></span></li>-->
+            <li style="background-color: rgb(0,255,0);">Holes: <span id="featureCountHole"></span></li>
+            <li style="background-color: rgb(0,255,255);">Pockets: <span id="featureCountPocket"></span></li>
+            <!-- <li style = "background-color: rgb(255,153,0);">Islands: <span id="featureCountIsland" ></span></li> -->
+            <!-- <li style = "background-color: rgb(255,255,0);">Blind holes: <span id="featureCountDrilled" ></span></li> -->
+        </ul>
+        <label for="partOpacity">Part Opacity</label>
+        <input type="range" id="partOpacity" min="0" max="1" step="0.01" value="0.1" />
+    </div>
+
+    <div id="cutModal" class="utilityModal">
+        <h3>Cut Model</h3>
+        <table id="cutTable">
+            <tr>
+                <th>Axis</th>
+                <th>Active</th>
+                <th>Flipped</th>
+
+            </tr>
+            <tr>
+                <td><label for="cutX">X</label></td>
+                <td><input id="cutX" type="checkbox" /></td>
+                <td><input id="cutXFlip" type="checkbox" /></td>
+
+            </tr>
+            <tr>
+                <td><label for="cutY">Y</label></td>
+                <td><input id="cutY" type="checkbox" /></td>
+                <td><input id="cutYFlip" type="checkbox" /></td>
+
+            </tr>
+            <tr>
+                <td><label for="cutZ">Z</label></td>
+                <td><input id="cutZ" type="checkbox" /></td>
+                <td><input id="cutZFlip" type="checkbox" /></td>
+
+            </tr>
+
+        </table>
+
+    </div>
+
+    <div id="modelTree" style="display: none;">
+
+    </div>
+
+    <div id="introModal" class="centerModal">
+        <h3><img src="images/ts3d_icon.svg" width="20px"
+                style="margin: 0 auto; padding: 0; margin-right: 10px; vertical-align: middle;" />Welcome!</h3>
+        <p>Please <span id="uploadPrompt" class="textLink">upload</span> a model to get started.</p>
+        <p>Don't have a model to test? Click <span id="loadDemoModel" class="textLink">here</span> to load a demo model.
+        </p>
+        <button id="closeIntroBtn" class="btnMedium">Close</button>
+    </div>
+
+    <div id="tourPrompt" class="centerModal">
+        <p>Would you like a quick tour?</p>
+        <button id="startTourBtn" class="btnMedium">Yes</button><button id="closeTourBtn" class="btnMedium">No</button>
+    </div>
+
+    <img id="brandLogo" src="images/Tech Soft 3D logo-2024.png" />
+    <script src="js/ui.js"></script>
+</body>
+
+</html>
