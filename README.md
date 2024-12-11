@@ -13,9 +13,8 @@ The goal of this demo is to demonstrate how [HOOPS Exchange](https://docs.techso
 
 This project was originally created from the Tech Soft 3D [3D Printing Demo](https://labs.techsoft3d.com/project/3d-printing-demo/).
 
-### Client
-1. Copy `hoops-web-viewer-monolith.iife.js` from the Communicator Package (located in `<HOOPS Communicator Install Directory>/web_viewer`) into `client/js/hoops`.
-2. Use the VS Code [Live Server extension](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) or your preferred server tool to serve `index.html`.
+### Running the Client
+Use the VS Code [Live Server extension](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) or your preferred server tool to serve `index.html`.
 
 ## How it works
 1. Upload a CAD part file via the client.
