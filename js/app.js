@@ -1,7 +1,7 @@
 let hwv; // Allow global access to web viewer for easy debugging / browser console interaction
 
 //let ServerURL = "https://cloud.techsoft3d.com/PgServer";
-let ServerURL = "http://localhost:8888";
+let ServerURL = "https://maas-backend.techsoft3d.com";
 
 let modelUuid = 0; // model UUID to request from the server
 let mainModelNode;
@@ -22,7 +22,7 @@ window.onload = () => {
 
     }
 
-    fetch(ServerURL + "/api/run_pgserver", {
+    fetch(ServerURL + "/pgServer/api/run_pgserver", {
         method: "POST"
     }).then((res) => {
         if (res.ok) {
@@ -60,7 +60,7 @@ window.onload = () => {
             hwv.view.setBackfacesVisible(true);
             //hwv.view.setProjectionMode(Communicator.Projection.Perspective);
 
-            fetch("../images/studio.ktx2").then((iblData) => {
+            fetch("images/studio.ktx2").then((iblData) => {
                 if (iblData.ok) {
                     iblData.blob().then((blob)=>{
                         const reader = new FileReader();
@@ -106,7 +106,7 @@ window.onload = () => {
     // Close server session:
     window.onbeforeunload = () => {
         let oReq = new XMLHttpRequest();
-        oReq.open("POST", ServerURL + "/CloseUuidSession", true);
+        oReq.open("POST", ServerURL + "/pgServer/CloseUuidSession", true);
 	    oReq.setRequestHeader("Content-Type", "text/plain"); 
         oReq.onreadystatechange = function (oEvent) {
             if (oReq.readyState === XMLHttpRequest.DONE && oReq.status === 200) {
@@ -151,12 +151,12 @@ function handleUpload(e, defaultFile=null) {
     //     responseType: "arraybuffer"
     // }).then((res) => {
     let oReq = new XMLHttpRequest();
-    oReq.open("POST", ServerURL + "/CloseUuidSession", true);
+    oReq.open("POST", ServerURL + "/pgServer/CloseUuidSession", true);
     oReq.setRequestHeader("Content-Type", "text/plain"); 
     oReq.onreadystatechange = function (oEvent) {
         if (oReq.readyState === XMLHttpRequest.DONE && oReq.status === 200) {
             const oReq2 = new XMLHttpRequest();
-            oReq2.open("POST", ServerURL + "/" + modelFile.name, true);
+            oReq2.open("POST", ServerURL + "/pgServer/" + modelFile.name, true);
             oReq2.setRequestHeader("Content-type", "multipart/form-data");
 
             oReq2.responseType = "arraybuffer";
