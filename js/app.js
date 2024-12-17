@@ -1,7 +1,7 @@
 let hwv; // Allow global access to web viewer for easy debugging / browser console interaction
 
 //let ServerURL = "https://cloud.techsoft3d.com/PgServer";
-let ServerURL = "https://maas-backend.techsoft3d.com";
+let ServerURL = "http://localhost:8888";
 
 let modelUuid = 0; // model UUID to request from the server
 let mainModelNode;
@@ -22,7 +22,7 @@ window.onload = () => {
 
     }
 
-    fetch(ServerURL + "/pgServer/api/run_pgserver", {
+    fetch(ServerURL + "/api/run_pgserver", {
         method: "POST"
     }).then((res) => {
         if (res.ok) {
@@ -60,7 +60,7 @@ window.onload = () => {
             hwv.view.setBackfacesVisible(true);
             //hwv.view.setProjectionMode(Communicator.Projection.Perspective);
 
-            fetch("images/studio.ktx2").then((iblData) => {
+            fetch("../images/studio.ktx2").then((iblData) => {
                 if (iblData.ok) {
                     iblData.blob().then((blob)=>{
                         const reader = new FileReader();
@@ -106,7 +106,7 @@ window.onload = () => {
     // Close server session:
     window.onbeforeunload = () => {
         let oReq = new XMLHttpRequest();
-        oReq.open("POST", ServerURL + "/pgServer/CloseUuidSession", true);
+        oReq.open("POST", ServerURL + "/CloseUuidSession", true);
 	    oReq.setRequestHeader("Content-Type", "text/plain"); 
         oReq.onreadystatechange = function (oEvent) {
             if (oReq.readyState === XMLHttpRequest.DONE && oReq.status === 200) {
@@ -151,12 +151,12 @@ function handleUpload(e, defaultFile=null) {
     //     responseType: "arraybuffer"
     // }).then((res) => {
     let oReq = new XMLHttpRequest();
-    oReq.open("POST", ServerURL + "/pgServer/CloseUuidSession", true);
+    oReq.open("POST", ServerURL + "/CloseUuidSession", true);
     oReq.setRequestHeader("Content-Type", "text/plain"); 
     oReq.onreadystatechange = function (oEvent) {
         if (oReq.readyState === XMLHttpRequest.DONE && oReq.status === 200) {
             const oReq2 = new XMLHttpRequest();
-            oReq2.open("POST", ServerURL + "/pgServer/" + modelFile.name, true);
+            oReq2.open("POST", ServerURL + "/" + modelFile.name, true);
             oReq2.setRequestHeader("Content-type", "multipart/form-data");
 
             oReq2.responseType = "arraybuffer";
@@ -321,9 +321,32 @@ function updateBounding(nodeId) {
         const modelWidth = Math.round(10*(boundingBox.max.y - boundingBox.min.y))/10;
         const modelHeight = Math.round(10*(boundingBox.max.z - boundingBox.min.z))/10;
 
-        document.getElementById("boundingLength").innerHTML = `${modelLength}mm`;
-        document.getElementById("boundingWidth").innerHTML = `${modelWidth}mm`;
-        document.getElementById("boundingHeight").innerHTML = `${modelHeight}mm`;
+        let units;
+
+        switch (hwv.model.getNodeUnitMultiplier(mainModelNode)) {
+            case 1:
+                units = "mm";
+                break;
+            case 25.4:
+                units = "in";
+                break;
+            case 10: 
+                units = "cm";
+                break;
+            case 100:
+                units = "m";
+                break;
+            case 304.8: 
+                units = "ft";
+                break;
+            default:
+                console.log("Cannot read units");
+                units = " unknown units";
+        }
+
+        document.getElementById("boundingLength").innerHTML = `${modelLength} ${units}`;
+        document.getElementById("boundingWidth").innerHTML = `${modelWidth} ${units}`;
+        document.getElementById("boundingHeight").innerHTML = `${modelHeight} ${units}`;
     });
 }
 

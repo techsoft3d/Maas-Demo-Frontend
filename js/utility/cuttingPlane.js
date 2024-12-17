@@ -43,7 +43,7 @@ function flipCuttingSection(axisId, axis, flipped) {
 }
 
 function addCuttingSection(axis, flipped) {
-    hwv.model.getNodeRealBounding(mainModelNode).then((boundingBox)=>{    
+    hwv.model.getNodesBounding([mainModelNode], {tightBounding: true, ignoreInvisible: true}).then((boundingBox)=>{    
         const refGeom = hwv.cuttingManager.createReferenceGeometryFromAxis(axis, boundingBox);
 
         const cuttingSection = hwv.cuttingManager.getCuttingSection(axis);

@@ -1,6 +1,4 @@
-
 class measureRadiusOperator {
-    
     constructor(hwv) {
         this._hwv = hwv;
         this._radius = null;
@@ -42,6 +40,12 @@ class measureRadiusOperator {
                     if (!subentityProps.hasOwnProperty("radius")) return;
                     
                     this._radius = Math.round(subentityProps.radius*100)/100;
+
+                    // TODO: Fix Inventor units
+                    if (this._hwv.model.getModelFileTypeFromNode(mainModelNode) === Communicator.FileType.Inventor) { // mainModelNode is global
+                        this._radius *= 10;
+                        this._radius = Math.round(this._radius*100)/100;
+                    }
     
                     const markupManager = this._hwv.markupManager;
     
@@ -160,7 +164,7 @@ class radiusMarkup extends Communicator.Markup.MarkupItem {
 
                 const text = new Communicator.Markup.Shapes.TextBox();
                 text.setPosition(point3d2);
-                text.setTextString(`R${this.radius * this._unit}mm`);
+                text.setTextString(`R${this.radius}mm`);
                 text.getBoxPortion().setFillColor(Communicator.Color.white());
                 text.getBoxPortion().setFillOpacity(1);
                 // text.getBoxPortion().setStrokeColor(Communicator.Color.black());
