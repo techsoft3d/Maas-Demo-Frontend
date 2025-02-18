@@ -60,7 +60,7 @@ window.onload = () => {
             hwv.view.setBackfacesVisible(true);
             //hwv.view.setProjectionMode(Communicator.Projection.Perspective);
 
-            fetch("images/studio.ktx2").then((iblData) => {
+            fetch("../images/studio.ktx2").then((iblData) => {
                 if (iblData.ok) {
                     iblData.blob().then((blob)=>{
                         const reader = new FileReader();
@@ -145,7 +145,8 @@ function handleUpload(e, defaultFile=null) {
     else {
         modelFile = defaultFile;
     }
-
+    console.log("File type:");
+    console.log(modelFile.type);
     // fetch(ServerURL + "/CloseSession", {
     //     method: "GET",
     //     responseType: "arraybuffer"
@@ -182,11 +183,14 @@ function handleUpload(e, defaultFile=null) {
                         // Hide any PMI:
                         await setupPmi();
 
-                        populateInfoPanel(mainModelNode);
+                        
                         generateModelTree();
                         await groundModel();
+                        populateInfoPanel(mainModelNode);
+                        
+
                         hwv.view.fitWorld();
-                        loadingDiv.style.display = "none";
+                       
                         await hwv.resumeRendering();
 
                         if (firstUpload) {
@@ -197,6 +201,10 @@ function handleUpload(e, defaultFile=null) {
                         firstUpload = false;
                     
                     }
+                    else {
+                        alert("Model reading failed. Please upload another model or contact us for assistance.")
+                    }
+                    loadingDiv.style.display = "none";
                 }
             }
             oReq2.send(modelFile);
@@ -262,7 +270,7 @@ function setupEventListeners() {
 
     // Option if user does not have a model to test with:
     document.getElementById("loadDemoModel").addEventListener("click", async ()=>{
-        let response = await fetch('./models/housing back.CATPart');
+        let response = await fetch('./models/TS3D_Sample.ipt');
         let blob = await response.blob();
         handleUpload(null, new File([blob], "Sample model"));
         closeIntroWindow();
@@ -316,14 +324,16 @@ function setupModelOrientationBtn() {
 
 function updateBounding(nodeId) {
     // X: x is x, y is y, z is z
-    hwv.model.getNodesBounding([nodeId], { tightBounding: true }).then((boundingBox) => {
+    hwv.model.getNodesBounding([nodeId], { tightBounding: true, ignoreInvisible: true }).then((boundingBox) => {
+        
         const modelLength = Math.round(10*(boundingBox.max.x - boundingBox.min.x))/10;
         const modelWidth = Math.round(10*(boundingBox.max.y - boundingBox.min.y))/10;
         const modelHeight = Math.round(10*(boundingBox.max.z - boundingBox.min.z))/10;
 
         let units;
-
-        switch (hwv.model.getNodeUnitMultiplier(mainModelNode)) {
+        let unitMultiplier = hwv.model.getNodeUnitMultiplier(mainModelNode);
+        
+        switch (unitMultiplier) {
             case 1:
                 units = "mm";
                 break;
@@ -344,9 +354,11 @@ function updateBounding(nodeId) {
                 units = " unknown units";
         }
 
-        document.getElementById("boundingLength").innerHTML = `${modelLength} ${units}`;
-        document.getElementById("boundingWidth").innerHTML = `${modelWidth} ${units}`;
-        document.getElementById("boundingHeight").innerHTML = `${modelHeight} ${units}`;
+        document.getElementById("boundingLength").innerHTML = `${Math.round(10*(modelLength/unitMultiplier))/10} ${units}`;
+        document.getElementById("boundingWidth").innerHTML = ` ${Math.round(10*(modelWidth/unitMultiplier ))/10} ${units}`;
+        document.getElementById("boundingHeight").innerHTML = `${Math.round(10*(modelHeight/unitMultiplier))/10} ${units}`;
+        
+
     });
 }
 

@@ -23,7 +23,8 @@ function setupThinWalls() {
             wallThicknessBtn.style.backgroundColor = inactiveBtnColor;
             if (thinWallNode !== null) {
                 await hwv.model.setNodesVisibility([thinWallNode], false);
-                await hwv.model.setNodesVisibility([mainModelNode], true);
+                //await hwv.model.setNodesVisibility([mainModelNode], true); // Use opactiy to preserve PMI visibility
+                await hwv.model.setNodesOpacity([mainModelNode], 1.0);
             }
         }    
         else {
@@ -33,7 +34,8 @@ function setupThinWalls() {
             wallThicknessBtn.style.backgroundColor = activeBtnColor;
             if (thinWallNode !== null) {
                 await hwv.model.setNodesVisibility([thinWallNode], true);
-                await hwv.model.setNodesVisibility([mainModelNode], false);
+                //await hwv.model.setNodesVisibility([mainModelNode], false); // Use opactiy to preserve PMI visibility
+                await hwv.model.setNodesOpacity([mainModelNode], 0);
             }
         }
     });
@@ -59,6 +61,12 @@ async function displayThinWalls() {
     if (!thinWallNode) {
         document.getElementById("loading").style.display = "block";
 
+        if (modelUuid == 0) {
+            alert("No model detected. Please try uploading a new model.")
+            document.getElementById("loading").style.display = "none";
+            return;
+        }
+
         var oReq = new XMLHttpRequest();
         // oReq.open("GET", ServerURL + "/WallThickness", true);
         oReq.open("POST", ServerURL + "/pgServer/WallThickness", true);
@@ -77,9 +85,13 @@ async function displayThinWalls() {
 
                     for (let i=0; i<float32Array.length; i++) {
                         if ((i+1)%4 == 0) {
-                            thinWallData.ptVals.push(float32Array[i]);
-                            if (float32Array[i] > thinWallData.max) thinWallData.max = float32Array[i];
-                            if (float32Array[i] < thinWallData.min) thinWallData.min = float32Array[i];
+                            let thicknessValue = float32Array[i];
+                            if (hwv.model.getModelFileTypeFromNode(mainModelNode) === Communicator.FileType.Inventor) {
+                                thicknessValue*=10;
+                            }
+                            thinWallData.ptVals.push(thicknessValue);
+                            if (thicknessValue > thinWallData.max) thinWallData.max = thicknessValue;
+                            if (thicknessValue < thinWallData.min) thinWallData.min = thicknessValue;
                         }
                         else {
                             thinWallData.meshPts.push(float32Array[i]);
@@ -91,7 +103,7 @@ async function displayThinWalls() {
         }
         oReq.send(modelUuid);
         oReq.onerror = ()=>{
-            alert("Failed analysis. Have you uploaded a model yet?")
+            alert("Failed analysis. Please try again or contact us.");
             document.getElementById("loading").style.display = "none";
         }
     }
@@ -125,6 +137,7 @@ function renderThinWalls() {
     let setColor5 = hexToRgb(document.getElementById("thinWallColor5").value);
 
     for (let i=0; i<thinWallData.ptVals.length; i++) {
+        
         if (thinWallData.ptVals[i] < setPt1){
             colors.push(
                 setColor1.rgbR,
@@ -177,7 +190,8 @@ function renderThinWalls() {
         meshInstanceData.setMatrix(nodeMatrix);
         const originalMatrix = hwv.model.getNodeNetMatrix(mainModelNode);
         hwv.model.createMeshInstance(meshInstanceData).then((instacdId) => {
-            hwv.model.setNodesVisibility([mainModelNode], false);
+            //hwv.model.setNodesVisibility([mainModelNode], false); // Use opactiy to preserve PMI visibility
+            hwv.model.setNodesOpacity([mainModelNode], 0);
             thinWallNode = instacdId;
             document.getElementById("loading").style.display = "none";
             hwv.model.setNodeMatrix(instacdId, originalMatrix);
@@ -188,7 +202,9 @@ function renderThinWalls() {
                 hwv.model.setNodeMatrix(instacdId, Communicator.Matrix.multiply(scaleMatrix, originalMatrix));
             }
             else {
-                hwv.model.setNodeMatrix(instacdId, originalMatrix);
+                const scaleMatrix = new Communicator.Matrix();
+                scaleMatrix.setScaleComponent(1/nodeUnitMultiplier,1/nodeUnitMultiplier,1/nodeUnitMultiplier);
+                hwv.model.setNodeMatrix(instacdId, Communicator.Matrix.multiply(scaleMatrix, originalMatrix));
             }
         });
     });

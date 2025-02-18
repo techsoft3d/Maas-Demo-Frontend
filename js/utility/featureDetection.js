@@ -53,6 +53,12 @@ async function detectFeatures() {
 
     document.getElementById("loading").style.display = "block";
 
+    if (modelUuid == 0) {
+        alert("No model detected. Please try uploading a new model.")
+        document.getElementById("loading").style.display = "none";
+        return;
+    }
+
     var oReq = new XMLHttpRequest();
     oReq.open("POST", ServerURL + "/pgServer/DetectFeatures", true);
     oReq.setRequestHeader("Content-Type", "text/plain"); 
@@ -102,7 +108,7 @@ async function detectFeatures() {
     }
     oReq.send(modelUuid);
     oReq.onerror = ()=>{
-        alert("Failed analysis. Have you uploaded a model yet?")
+        alert("Failed analysis. Please try again or contact us.");
         document.getElementById("loading").style.display = "none";
     }
 
@@ -132,7 +138,9 @@ function renderFeatures(points, vertexColors) {
                 hwv.model.setNodeMatrix(instacdId, Communicator.Matrix.multiply(scaleMatrix, originalMatrix));
             }
             else {
-                hwv.model.setNodeMatrix(instacdId, originalMatrix);
+                const scaleMatrix = new Communicator.Matrix();
+                scaleMatrix.setScaleComponent(1/nodeUnitMultiplier,1/nodeUnitMultiplier,1/nodeUnitMultiplier);
+                hwv.model.setNodeMatrix(instacdId, Communicator.Matrix.multiply(scaleMatrix, originalMatrix));
             }
         });
     });

@@ -234,7 +234,7 @@
                 <td>&#x2192;</td>
                 <td><input id="thinWallVal1" class="thicknessInput" type="number" min="0" value="0.5" step="0.1"
                         style="width: 50px; text-align: right;" /></td>
-                <td>mm</td>
+                <td class="wallUnits">mm</td>
             </tr>
             <tr>
                 <td><input id="thinWallColor2" class="thicknessInput" type="color" value="#ffaa00" /></td>
@@ -242,7 +242,7 @@
                 <td>&#x2192;</td>
                 <td><input id="thinWallVal2" class="thicknessInput" type="number" min="0" value="1" step="0.1"
                         style="width: 50px; text-align: right;" /></td>
-                <td>mm</td>
+                <td class="wallUnits">mm</td>
             </tr>
             <tr>
                 <td><input id="thinWallColor3" class="thicknessInput" type="color" value="#00ff00" /></td>
@@ -250,7 +250,7 @@
                 <td>&#x2192;</td>
                 <td> <input id="thinWallVal3" class="thicknessInput" type="number" min="0" value="2" step="0.1"
                         style="width: 50px; text-align: right;" /></td>
-                <td>mm</td>
+                <td class="wallUnits">mm</td>
             </tr>
             <tr>
                 <td><input id="thinWallColor4" class="thicknessInput" type="color" value="#0000ff" /></td>
@@ -258,12 +258,12 @@
                 <td>&#x2192;</td>
                 <td><input id="thinWallVal4" class="thicknessInput" type="number" min="0" value="4" step="0.1"
                         style="width: 50px; text-align: right;" /></td>
-                <td>mm</td>
+                <td class="wallUnits">mm</td>
             </tr>
             <tr>
                 <td><input id="thinWallColor5" class="thicknessInput" type="color" value="#ff00ff" /></td>
                 <td><label for="wallThicknessInputOver"><span id="thinWallVal4Out">4</span>+</td>
-                <td>mm</td>
+                <td class="wallUnits">mm</td>
                 <td></td>
                 <td></td>
             </tr>
@@ -322,7 +322,7 @@
     </div>
 
     <div id="introModal" class="centerModal">
-        <h3><img src="images/ts3d_icon.svg" width="20px"
+        <h3><img src="./images/ts3d_icon.svg" width="20px"
                 style="margin: 0 auto; padding: 0; margin-right: 10px; vertical-align: middle;" />Welcome!</h3>
         <p>Please <span id="uploadPrompt" class="textLink">upload</span> a model to get started.</p>
         <p>Don't have a model to test? Click <span id="loadDemoModel" class="textLink">here</span> to load a demo model.
@@ -335,8 +335,8 @@
         <button id="startTourBtn" class="btnMedium">Yes</button><button id="closeTourBtn" class="btnMedium">No</button>
     </div>
 
-    <img id="brandLogo" src="images/Tech Soft 3D logo-2024.png" />
-    <script src="js/ui.js"></script>
+    <img id="brandLogo" src="./images/Tech Soft 3D logo-2024.png" />
+    <script src="./js/ui.js"></script>
 </body>
 
 </html>
